@@ -44,7 +44,16 @@ class LessonAdmin(admin.ModelAdmin):
     search_fields = ['title']
 
 
-admin.site.register(Course)
+class CourseAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None, {'fields': ['name']}),
+        ('Description', {'fields': ['description']}),
+    ]
+    list_display = ('name', 'created_at')
+    search_fields = ['name']
+
+
+admin.site.register(Course, CourseAdmin)
 admin.site.register(Instructor)
 admin.site.register(Learner)
 admin.site.register(Enrollment)

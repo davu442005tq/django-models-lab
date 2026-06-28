@@ -27,6 +27,7 @@
 
                 <div class="display-1 mb-3">{{ score }}%</div>
                 <p class="lead">You answered <strong>{{ correct }}</strong> out of <strong>{{ total }}</strong> questions correctly.</p>
+                <p>Score: <strong>{{ total_score }}</strong> / <strong>{{ possible_score }}</strong></p>
 
                 <div class="progress mb-4" style="height: 30px;">
                     <div class="progress-bar {% if passed %}bg-success{% else %}bg-danger{% endif %}" role="progressbar" style="width: {{ score }}%;" aria-valuenow="{{ score }}" aria-valuemin="0" aria-valuemax="100">{{ score }}%</div>
@@ -48,6 +49,7 @@
                             <tr>
                                 <th>Question</th>
                                 <th>Your Answer</th>
+                                <th>Correct Answer</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -56,6 +58,11 @@
                                 <tr>
                                     <td>{{ submission.question.question_text }}</td>
                                     <td>{{ submission.selected_choice.choice_text }}</td>
+                                    <td>
+                                        {% for choice in submission.question.choices.all %}
+                                            {% if choice.is_correct %}{{ choice.choice_text }}{% endif %}
+                                        {% endfor %}
+                                    </td>
                                     <td>
                                         {% if submission.selected_choice.is_correct %}
                                             <span class="badge bg-success">Correct</span>

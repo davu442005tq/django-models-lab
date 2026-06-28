@@ -5,6 +5,14 @@ from django.contrib import messages
 from .models import Course, Learner, Enrollment, Question, Choice, Submission
 
 
+def is_get_score(submissions, total_questions):
+    correct = sum(1 for s in submissions if s.selected_choice.is_correct)
+    total_score = correct
+    possible_score = total_questions
+    grade = int((total_score / possible_score) * 100) if possible_score > 0 else 0
+    return total_score, possible_score, grade
+
+
 def course_details(request, course_id):
     course = get_object_or_404(Course, pk=course_id)
     return render(request, 'onlinecourse/course_details_bootstrap.html', {'course': course})
@@ -49,7 +57,8 @@ def submit(request, course_id):
             except Choice.DoesNotExist:
                 continue
 
-    grade = int((correct / total) * 100) if total > 0 else 0
+    submissions = Submission.objects.filter(enrollment=enrollment)
+    total_score, possible_score, grade = is_get_score(submissions, total)
     passed = grade >= 50
 
     return render(request, 'onlinecourse/exam_result.html', {
@@ -58,6 +67,8 @@ def submit(request, course_id):
         'score': grade,
         'correct': correct,
         'total': total,
+        'total_score': total_score,
+        'possible_score': possible_score,
         'passed': passed,
         'selected_ids': selected_ids,
     })
@@ -70,9 +81,9 @@ def show_exam_result(request, course_id):
     enrollment = get_object_or_404(Enrollment, learner=learner, course=course)
     questions = course.questions.all()
     submissions = Submission.objects.filter(enrollment=enrollment)
+    total_score, possible_score, grade = is_get_score(submissions, questions.count())
     correct = sum(1 for s in submissions if s.selected_choice.is_correct)
     total = questions.count()
-    grade = int((correct / total) * 100) if total > 0 else 0
     passed = grade >= 50
 
     selected_ids = {}
@@ -85,6 +96,8 @@ def show_exam_result(request, course_id):
         'score': grade,
         'correct': correct,
         'total': total,
+        'total_score': total_score,
+        'possible_score': possible_score,
         'passed': passed,
         'submissions': submissions,
         'selected_ids': selected_ids,
